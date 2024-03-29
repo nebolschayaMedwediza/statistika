@@ -1,0 +1,139 @@
+---
+title: "HW3"
+author: "Liubov Skibina"
+date: "2024-03-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages("readxl")
+library(readxl)
+```
+
+Загружаем дата-сет. Загружаю по полному пути (по-другому у меня никак не получается, прошу понять и простить)
+
+```{r}
+pima <- read_excel(path = "C:/Users/liubov/Downloads/pima.xlsx")
+
+```
+
+Наличие/отсутствие диабета ну никак не должны быть строкой. Изменяем с помощью mutate, для нее нужна библиотека dplyr
+
+```{r}
+library(dplyr)
+pima <- mutate (pima, diabetes = as.factor(diabetes))  
+```
+
+Все необходимые писательные статистики даст summary
+
+```{r}
+summary(pima[, c("glucose", "pressure","mass")])
+```
+
+Но вы на занятии намекнули, что нужно рассчитать их отдельно:
+
+```{r}
+pima_desc <- pima %>%
+  summarise(N = n(),
+            mean_glucose = mean(glucose),
+            sd_glucose = sd(glucose),
+            "Q1, Q3_glucose" = paste(quantile(glucose, probs = 0.25), 
+                                      ",",
+                                      quantile(glucose, probs = 0.75)),
+            Min_glucose = min(glucose),
+            Max_glucose = max(glucose),
+            mean_pressure = mean(pressure),
+            sd_pressure = sd(pressure),
+            "Q1, Q3_pressure" = paste(quantile(pressure, probs = 0.25), 
+                                       ",",
+                                       quantile(pressure, probs = 0.75)),
+            Min_pressure = min(pressure),
+            Max_pressure = max(pressure),
+            mean_mass = mean(mass),
+            sd_mass = sd(mass),
+            "Q1, Q3_mass" = paste(quantile(mass, probs = 0.25), 
+                                   ",",
+                                   quantile(mass, probs = 0.75)),
+            Min_mass = min(mass),
+            Max_mass = max(mass))
+     
+```
+
+Судя по минимуму в этих трех категориях (был перепроверен вручную), в выборке присутствуют люди с несовместимыми с жизнью показателями.
+
+Diabetes является качественной переменной, поэтому summary выводит в качестве ее описательной статистики частоту наличия/отсутствия диабета.
+
+```{r}
+summary(pima$diabetes)
+```
+
+Группируем по возрасту
+
+```{r}
+pima <- pima %>%
+  mutate(age_group = cut(age, breaks = c(0, 35, 49, Inf), labels = c("21-35", "36-49", "50+")))
+```
+
+Доверительные интервал
+
+```{r}
+confidence_interval <- t.test(pima$pedigree, conf.level = 0.90)$conf.int
+```
+
+```{r}
+library(ggplot2)
+
+```
+
+График плотности вероятности
+
+```{r}
+mean_glucose <- mean(pima$glucose)
+
+ggplot(pima, aes(x = glucose)) +
+  geom_density(fill = "yellow", color = "blue", alpha = 0.5) +
+  geom_vline(xintercept = mean_glucose, color = "red", size = 1) +
+  labs(title = "График плотности вероятности для переменной glucose",
+       x = "Уровень глюкозы",
+       y = "Плотность вероятности")
+```
+
+Гистограмма
+
+```{r}
+hist(x = pima$glucose,
+   breaks = 30,
+   main = "Распределение уровня глюкозы",
+   xlab = "Уровень глюкозы",
+   ylab = "Частота")
+
+
+  geom_boxplot(aes(diabetes, glucose, fill = diabetes)) +
+  labs(title = "Диабет в зависимости от уровня глюкозы")
+```
+
+Диаграмма рассеяния должна быть разбита на две части по условию наличия или отсутствия диабета. Почему-то не получается разделить и по форме и по цвету, только что-то одно (или ничего)
+
+```{r}
+ggplot(pima, aes(x = triceps, y = mass)) +
+  geom_point(aes(fill = factor(diabetes)), shape = 21, size = 2) +
+  labs(title = "Наличие и отсутствие диабета по показателям массы тела и обхвата трицепса",
+       x = "Обхват трицепса",
+       y = "Масса тела")
+```
+
+Но может вообще фасетный график нужно было сделать
+
+```{r}
+ggplot(pima, aes(x = triceps, y = mass)) +
+  geom_point((aes(color = factor(diabetes)))) +
+  facet_grid(. ~ diabetes) +
+  labs(title = "Рассеяние массы тела от обхвата трицепса с разделением по диабету",
+       x = "Обхват трицепса",
+       y = "Масса тела") +
+  theme_minimal()
+```
