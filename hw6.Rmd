@@ -1,0 +1,85 @@
+---
+title: "HW6"
+author: "Liubov Skibina"
+date: "2024-04-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Задача 1
+```{r}
+# Уровень значимости
+alpha <- 0.05
+
+# Мощность
+beta <- 0.20
+
+# Дисперсия
+sigma_m_squared <- 0.20
+
+# Разница средних
+delta <- -0.1
+
+# Клинически значимая разница
+epsilon <- 0.25
+
+# Критическое значение для alpha/2
+z_alpha_over_2 <- qnorm(1 - alpha/2)
+
+# Критическое значение для мощности (1 - beta)
+z_beta <- qnorm(1 - beta)
+
+# Расчет выборки
+n <- ((z_alpha_over_2 + z_beta)^2 * sigma_m_squared) / (2 * (delta - abs(epsilon))^2)
+
+# Вывод результатов
+print(paste("Размер выборки для каждого периода (n1 = n2) составляет:", round(n)))
+```
+Задача 2
+```{r}
+# Заданные параметры
+alpha <- 0.05
+beta <- 0.20
+delta <- -0.1
+p1 <- 0.65
+p2 <- 0.85
+
+# Критическое значение для alpha/2
+z_alpha_over_2 <- qnorm(1 - alpha/2)
+
+# Критическое значение для мощности (1 - beta)
+z_beta <- qnorm(1 - beta)
+
+# Расчет выборки
+n <- ((z_alpha_over_2 + z_beta)^2 * (p1 * (1 - p1) + p2 * (1 - p2))) / ((p1 - p2 - delta)^2)
+
+# Вывод результатов
+print(paste("Размер выборки для каждой группы (n1 = n2) составляет:", round(n)))
+```
+
+Задача 3
+```{r}
+alpha <- 0.05
+beta <- 0.20
+HR <- 2
+p1 <- 0.8
+d <- 1
+
+# Критическое значение для alpha/2
+z_alpha_over_2 <- qnorm(1 - alpha/2)
+
+# Критическое значение для мощности (1 - beta)
+z_beta <- qnorm(1 - beta)
+
+# Расчет выборки
+n <- ((z_alpha_over_2 + z_beta)^2) / (log((HR)^2) * p1 * (1 - p1) * d)
+
+# Вывод результатов
+print(paste("Размер выборки для каждой группы (n1 = n2) составляет:", round(n)))
+```
+
